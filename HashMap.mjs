@@ -1,8 +1,11 @@
-import { LinkedList } from "./LinkedList.mjs";
+import { Node } from "./Node.mjs";
 
-class HashMap {
+export class HashMap {
+    size = 0;
+    capacity = 16;
+
     constructor() {
-        this.bucket = new Array(16);
+        this.bucket = new Array(this.capacity).fill(null);
     }
 
     hash(key) {
@@ -16,10 +19,143 @@ class HashMap {
         return hashCode;
     }
 
-    set(key, value) {
-        const hashCode = this.hash(key) % 16;
+    calculateLoadFactor() {
+        return this.size / this.bucket.length;
+    }
 
-        this.bucket[hashCode] = value;
+    resizeAndRehash() {
+        const oldBucket = this.bucket;
+        this.bucket = new Array(oldBucket.length * 2).fill(null);
+        this.size = 0;
+
+        for (let i = 0; i < oldBucket.length; i++) {
+            let currentNode = oldBucket[i];
+
+            if (currentNode !== null) {
+                while (currentNode !== null) {
+                    this.set(currentNode.key, currentNode.value);
+                    currentNode = currentNode.nextNode;
+                }
+            }
+        }
+    }
+
+    set(key, value) {
+        if (this.calculateLoadFactor() >= 0.75) {
+            this.resizeAndRehash();
+        }
+
+        const hashCode = this.hash(key) % this.bucket.length;
+
+        if (this.bucket[hashCode] === null) {
+            this.bucket[hashCode] = new Node(key, value);
+        } else {
+            let currentNode = this.bucket[hashCode];
+
+            while (currentNode.nextNode !== null) {
+                currentNode = currentNode.nextNode;
+            }
+
+            currentNode.nextNode = new Node(key, value);
+        }
+
+        this.size++;
+    }
+
+    get(key) {
+        const hashCode = this.hash(key) % this.bucket.length;
+
+        if (this.bucket[hashCode] === null) {
+            return null;
+        }
+
+        const currentNode = this.bucket[hashCode];
+
+        while (currentNode !== null) {
+            if (currentNode.key === key) {
+                return currentNode.value;
+            }
+            currentNode = currentNode.nextNode;
+        }
+    }
+
+    has(key) {
+        const hashCode = this.hash(key) % this.bucket.size;
+
+        if (this.bucket[hashCode] === null) {
+            return false;
+        } else {
+            let currentNode = this.bucket[hashCode];
+
+            while (currentNode !== null) {
+                if (currentNode.key === key) {
+                    return true;
+                }
+
+                currentNode = currentNode.nextNode;
+            }
+        }
+
+        return false;
+    }
+
+    length() {
+        return this.size;
+    }
+
+    clear() {
+        this.bucket = new Array(this.capacity).fill(null);
+    }
+
+    keys() {
+        let result = [];
+
+        for (let i = 0; i < this.bucket.length; i++) {
+            let currentNode = this.bucket[i];
+
+            while (currentNode !== null) {
+                result.push(currentNode.key);
+
+                currentNode = currentNode.nextNode;
+            }
+        }
+
+        return result;
+    }
+
+    values() {
+        let result = [];
+
+        for (let i = 0; i < this.bucket.length; i++) {
+            let currentNode = this.bucket[i];
+
+            while (currentNode !== null) {
+                result.push(currentNode.value);
+
+                currentNode = currentNode.nextNode;
+            }
+        }
+
+        return result;
+    }
+
+    entries() {
+        let result = [];
+
+        for (let i = 0; i < this.bucket.length; i++) {
+            let currentNode = this.bucket[i];
+
+            while (currentNode !== null) {
+                let singleResult = [];
+                singleResult.push(currentNode.key);
+                singleResult.push(currentNode.value);
+
+                currentNode = currentNode.nextNode;
+                result.push(singleResult);
+            }
+        }
+
+        return result;
     }
 
     print() {
@@ -28,21 +164,3 @@ class HashMap {
         }
     }
 }
-
-const test = new HashMap();
-
-test.set("apple", "red");
-test.set("banana", "yellow");
-test.set("carrot", "orange");
-test.set("dog", "brown");
-test.set("elephant", "gray");
-test.set("frog", "green");
-test.set("grape", "purple");
-test.set("hat", "black");
-test.set("ice cream", "white");
-test.set("jacket", "blue");
-test.set("kite", "pink");
-test.set("lion", "golden");
-
-// console.log(test.bucket);
-test.print();

@@ -1,5 +1,7 @@
 export class LinkedList {
-    _head = null;
+    constructor() {
+        this._head = null;
+    }
 
     append(value) {
         const node = new Node();
