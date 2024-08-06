@@ -1,3 +1,5 @@
+import { LinkedList } from "./LinkedList.mjs";
+
 class HashMap {
     constructor() {
         this.bucket = new Array(16);
