@@ -157,10 +157,4 @@ export class HashMap {
 
         return result;
     }
-
-    print() {
-        for (let i = 0; i < this.bucket.length; i++) {
-            console.log(i + " " + this.bucket[i]);
-        }
-    }
 }
